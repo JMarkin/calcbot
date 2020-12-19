@@ -1,30 +1,22 @@
-use nom::{branch::alt, bytes::complete::tag};
-use nom::{character::complete::multispace0, combinator::map_res};
+use nom::character::complete::multispace0;
 use nom::error::ParseError;
-use nom::IResult;
 use nom::multi::fold_many0;
 use nom::number::complete::double;
 use nom::sequence::delimited;
 use nom::sequence::tuple;
-
-pub type BoxError = std::boxed::Box<
-    dyn std::error::Error + std::marker::Send + std::marker::Sync, // needed for threads
->;
-
+use nom::IResult;
+use nom::{branch::alt, bytes::complete::tag};
 fn ws<'a, F: 'a, O, E: ParseError<&'a str>>(
     inner: F,
 ) -> impl FnMut(&'a str) -> IResult<&'a str, O, E>
-    where
-        F: Fn(&'a str) -> IResult<&'a str, O, E>,
+where
+    F: Fn(&'a str) -> IResult<&'a str, O, E>,
 {
     delimited(multispace0, inner, multispace0)
 }
 
 fn factor(s: &str) -> IResult<&str, f64> {
-    alt((
-        ws(double),
-        delimited(ws(tag("(")), ws(expr), ws(tag(")")))
-    ))(s)
+    alt((ws(double), delimited(ws(tag("(")), ws(expr), ws(tag(")")))))(s)
 }
 
 fn term(s: &str) -> IResult<&str, f64> {
@@ -61,9 +53,7 @@ pub fn calc(s: &str) -> String {
     let resp = expr(s);
     let err = "Invalid, please try";
     match resp {
-        Err(e) => {
-            err.to_string()
-        }
+        Err(e) => err.to_string(),
         Ok((i, resp)) => {
             if i != "" {
                 return err.to_string();
@@ -75,7 +65,6 @@ pub fn calc(s: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-    use nom::error::{Error, ErrorKind};
 
     use super::*;
 

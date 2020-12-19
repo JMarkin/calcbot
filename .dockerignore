@@ -1,0 +1,6 @@
+*
+
+!src
+!Cargo.toml
+!Cargo.lock
+!install_openssl.sh
